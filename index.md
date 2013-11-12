@@ -1,118 +1,178 @@
-# よろしくsassdoc
+# CSSのテスト
 
 [@GeckoTang](http://twitter.com/GeckoTang)
 
 ---
 
-## sassdocとは?
+## CSSのテストって何するの？
 
-Ruby製のSASSドキュメントジェネレーターです。
-
-[https://github.com/eoneill/sassdoc](https://github.com/eoneill/sassdoc)
-
-何種類かあるのですが、僕は記法がjsDocToolKitに似ている[eoneill/sassdoc](https://github.com/eoneill/sassdoc)を使いました。
+- CSSが正しく書かれているかのテスト
+- ある部分を変更して、それ以外の部分に影響が出てないかのテスト
+- Sassとかで作った@functionが正しい値を返しているかのテスト
 
 ---
 
-## styleDoccoとの違い
+## テスト方法は？
 
-- styleDoccoはあくまでスタイルガイドなので、jsDocToolKitなどのコードのドキュメントではありません。
-- @mixinや@functionの説明をかけなくはないが、なんか見辛い。
-- 自由度が低い（テンプレートのカスタマイズがしにくい）
+- CSSの値チェック
+- 画像比較
+- Sassの@functionをテスト
 
 ---
 
-## sassdocができる事
+## CSSの値チェック
 
-- SASS内に書いたコメントからドキュメントを作成
-- sassdoc記法にそって書いた内容が整形されて表示される
-- ドキュメント内のmixinやfunctionを検索できる
-- 表示する内容のフィルター出来る(mixinのみ表示、functionのみ表示）
-- テンプレートがカスタマイズ出来る ( [Dustjs](http://akdubya.github.com/dustjs)っていうテンプレートエンジン )
----
+間違ったCSSが書かれていないかをLintしたり、
 
-## こんな記法
+指定した要素に正しい値か適用されてるかをテストする。
 
-styleDoccoとは違い、行コメントの中に独自の記法でかく
+- [Cactus](https://github.com/winston/cactus)
+- [CSSunit](https://github.com/gagarine/CSSunit)
+- [CSS Lint](http://csslint.net/)
+- [cssert](https://github.com/thingsinjars/cssert)
 
-``` javascript
-// @mixin pointer-events
-// @param $value {String} [none|auto]
-// @usage:
-// .link.disabled{
-//  =pointer-events(none);
-// }
-@mixin pointer-events($value:none) {
-  -webkit-pointer-events: $value;
-  pointer-events: $value;
-}
+-v-
+
+### Cactus
+
+.headerのfont-sizeが24pxかどうかをチェック
+
+```javascript
+Cactus.expect(".header", "font-size").toEqual("24px");
 ```
 
-jsDocToolKitっぽい書き方が出来ます。
-<small>（=pointer-events..と書いているのは@usageの中に@が使えない都合でSASS記法になっています）</small>
+-v-
 
----
+### CSSunit
 
-## インストール
+h2のcolorがrgb(0, 128, 0)と同じかをチェック
+
+```
+var actual = $('h2').css('color');
+module('Simple CSS');
+test("title color blue", 1, function() {
+  same( actual, 'rgb(0, 128, 0)', 'message' );
+});
+```
+
+-v-
+
+### CSS Lint
+
+propertyやvalueに不正がないかをチェック
+
+```css
+nav { paddling: 250px; }
+nav ul { background: #red; }
+```
 
 ```sh
-[sudo] gem install sassdoc
+$ csslint test.css
+csslint: There are 3 problems in test.css.
+
+test.css
+1: warning at line 5, col 3
+Unknown property 'paddling'.
+  paddling: 250px;
+
+test.css
+2: warning at line 7, col 1
+Rule is empty.
+nav ul {
+
+test.css
+3: error at line 8, col 15
+Expected a hex color but found '#red' at line 8, col 15.
+  background: #red;
+```
+
+-v-
+
+### cssert
+
+pxgrid.comのh3が[base.css](http://www.pxgrid.com/common/css/base.css)の内容が反映されているかをチェック
+
+![ss1.png](img/ss1.png)
+
+```sh
+$ ./cssert testcases.html
+--
+h3 : Passed
 ```
 
 ---
 
-## ディレクトリ構成
+## 画像比較系
 
-以下の様なディレクトリ構成
+何かアクション(CSSの変更、要素をクリックなど)を
+
+起こす前と起こした後の画像を比較します
+
+- [PhantomCss](https://github.com/Huddle/PhantomCSS)
+- [Hardy](http://hardy.io/)
+- [CSSCritic](http://csste.st/tools/csscritic.html)
+
+-v-
+
+### PhantomCSS
 
 ```
-┣src
-┃┣ style.scss
-┃┗ _mixin.scss
-┗docs/
+デモ
+```
+
+-v-
+
+### Hardy
+
+```
+デモ
+```
+
+-v-
+
+### CSS Critic
+
+```
+デモ
 ```
 
 ---
 
-## 生成してみる
+## Sassの@functionをテスト
 
-- ``src``以下にある``scss``をもとに、``docs``にドキュメントを作成します。
-- ドキュメントのタイトルは``俺の考えた最強のドキュメント``とします。
+- [true](https://github.com/ericam/true)
+- [bootcamp](https://github.com/tctcl/bootcamp) 
 
-```
-sassdoc src -d docs -n '俺の考えた最強のドキュメント'
-```
+-v-
 
-各オプションについては[README](https://github.com/eoneill/sassdoc/blob/master/README.md)を見てね！
-
----
-
-## 生成された
+### true
 
 ```
-┣src
-┃┣ style.scss
-┃┗ mixin.scss
-┗docs/
-　┣ css/
-　┣ js/
-　┣ tmpl/
-　┣ index.html       #ドキュメントトップページ
-　┃┣ nav.tmpl       #上部ナビゲーション
-　┃┣ toc.tmpl       #左カラム
-　┃┗ view.tmpl      #右カラム
-　┗ sassdoc.json     #テンプレートで使用するデータ
+デモ
 ```
 
-生成された[サンプルはこちら](http://geckotang.github.io/sassdoc-tryout/docs/)
+-v-
 
-<small>※sassdoc.jsonを$.getJSONしてリッチなページにしているので、サーバー上でしか動きません。</small>
+### bootcamp
+
+```
+デモ
+```
 
 ---
 
 ## まとめ
 
-- SASSなどのプリプロセッサでできる事が他のプログラミング言語に近づいている
-- ということは、他言語のようにドキュメント作成ツールは必要
-- 詳しくはソース見てね！とかは悲しい…
-- 既存のテンプレはどことなく見辛いので、自分で作ったほうが良さそう。
+- まだまだ発展途上なCSS(手動||自動)テスト
+- 複雑なWebアプリケーションならやってもいいかも
+- 簡単なウェブページは必要なさそう
+- @functionのテストは実用的かも（そこまで複雑な@functionを書くかは置いておいて）
+- テストするためにも綺麗なコメントの入れ方が必要になりそう（jsDocToolkit的な）
+
+---
+
+## 参考
+
+- [csste.st](http://csste.st/tools/)
+- [4 tools for automatic CSS](http://www.creativebloq.com/css3/4-tools-automatic-css-testing-7133777)
+- [Automatic CSS Testing](http://css-tricks.com/automatic-css-testing/)
